@@ -26,6 +26,7 @@ class RegisterRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'role' => ['required', 'string', 'in:admin,worker,client'],
         ];
     }
 
@@ -42,6 +43,8 @@ class RegisterRequest extends FormRequest
             'email.unique' => 'This email is already registered.',
             'password.required' => 'Password is required.',
             'password.confirmed' => 'Password confirmation does not match.',
+            'role.required' => 'Role is required.',
+            'role.in' => 'Role must be one of: admin, worker, client.',
         ];
     }
 } 

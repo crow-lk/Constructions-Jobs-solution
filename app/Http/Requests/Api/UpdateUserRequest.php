@@ -33,6 +33,7 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users')->ignore($this->user),
             ],
             'password' => ['sometimes', Password::defaults()],
+            'role' => ['sometimes', 'string', 'in:admin,worker,client'],
         ];
     }
 
@@ -45,6 +46,7 @@ class UpdateUserRequest extends FormRequest
             'name.max' => 'Name cannot exceed 255 characters.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email is already registered.',
+            'role.in' => 'Role must be one of: admin, worker, client.',
         ];
     }
 } 
