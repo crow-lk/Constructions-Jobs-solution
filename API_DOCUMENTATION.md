@@ -354,7 +354,7 @@ Consider implementing offline support for better user experience:
 
 ## Adding New Resources
 
-To add new API resources (e.g., Projects, Tasks, Clients), follow this pattern:
+To add new API resources (e.g., Tasks, Clients, etc.), follow this pattern:
 
 1. Create the model and migration
 2. Create the API controller extending BaseController
@@ -362,24 +362,24 @@ To add new API resources (e.g., Projects, Tasks, Clients), follow this pattern:
 4. Create API resources
 5. Add routes to `routes/api.php`
 
-Example for a Project resource:
+Example for a Task resource:
 ```php
 // routes/api.php
-Route::apiResource('projects', ProjectController::class);
+Route::apiResource('tasks', TaskController::class);
 
-// app/Http/Controllers/Api/ProjectController.php
-class ProjectController extends BaseController
+// app/Http/Controllers/Api/TaskController.php
+class TaskController extends BaseController
 {
     public function index(Request $request)
     {
-        $projects = Project::paginate($request->per_page ?? 15);
-        return ProjectResource::collection($projects);
+        $tasks = Task::paginate($request->per_page ?? 15);
+        return TaskResource::collection($tasks);
     }
     
-    public function store(StoreProjectRequest $request)
+    public function store(StoreTaskRequest $request)
     {
-        $project = Project::create($request->validated());
-        return $this->createdResponse(new ProjectResource($project));
+        $task = Task::create($request->validated());
+        return $this->createdResponse(new TaskResource($task));
     }
     
     // ... other methods

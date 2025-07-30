@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->text('description')->nullable();
-            $table->string('status')->default('active');
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->decimal('budget', 10, 2)->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->json('permissions')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('roles');
     }
 };

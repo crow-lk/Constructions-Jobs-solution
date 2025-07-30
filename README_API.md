@@ -23,11 +23,10 @@ This document explains how to implement and use the API backend for your mobile 
 - ✅ Pagination support
 - ✅ Sorting options
 
-### 4. **Project Management (Example Resource)**
-- ✅ Full CRUD operations for projects
-- ✅ Relationship with users
-- ✅ Advanced filtering and search
-- ✅ Date and budget handling
+### 4. **Role Management**
+- ✅ Role-based access control
+- ✅ Permission management
+- ✅ User-role relationships
 
 ## 📁 File Structure
 
@@ -38,22 +37,18 @@ app/
 │   │   └── Api/
 │   │       ├── AuthController.php          # Authentication endpoints
 │   │       ├── BaseController.php          # Base API controller
-│   │       ├── UserController.php          # User management
-│   │       └── ProjectController.php       # Project management
+│   │       └── UserController.php          # User management
 │   ├── Requests/
 │   │   └── Api/
 │   │       ├── LoginRequest.php            # Login validation
 │   │       ├── RegisterRequest.php         # Registration validation
 │   │       ├── StoreUserRequest.php        # User creation validation
-│   │       ├── UpdateUserRequest.php       # User update validation
-│   │       ├── StoreProjectRequest.php     # Project creation validation
-│   │       └── UpdateProjectRequest.php    # Project update validation
+│   │       └── UpdateUserRequest.php       # User update validation
 │   └── Resources/
-│       ├── UserResource.php                # User data formatting
-│       └── ProjectResource.php             # Project data formatting
+│       └── UserResource.php                # User data formatting
 ├── Models/
 │   ├── User.php                           # User model with Sanctum
-│   └── Project.php                        # Project model
+│   └── Role.php                           # Role model
 routes/
 └── api.php                                # API routes
 ```
@@ -100,13 +95,6 @@ Make sure your `bootstrap/app.php` includes API routes:
 - `GET /api/users/{id}` - Get specific user
 - `PUT /api/users/{id}` - Update user
 - `DELETE /api/users/{id}` - Delete user
-
-### Projects
-- `GET /api/projects` - List projects (with filters)
-- `POST /api/projects` - Create project
-- `GET /api/projects/{id}` - Get specific project
-- `PUT /api/projects/{id}` - Update project
-- `DELETE /api/projects/{id}` - Delete project
 
 ## 🧪 Testing the API
 
@@ -220,19 +208,6 @@ class ApiClient {
             body: JSON.stringify(userData),
         });
     }
-    
-    // Project methods
-    async getProjects(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
-        return this.request(`/projects?${queryString}`);
-    }
-    
-    async createProject(projectData) {
-        return this.request('/projects', {
-            method: 'POST',
-            body: JSON.stringify(projectData),
-        });
-    }
 }
 ```
 
@@ -252,7 +227,6 @@ Schema::create('tasks', function (Blueprint $table) {
     $table->string('title');
     $table->text('description')->nullable();
     $table->string('status')->default('pending');
-    $table->foreignId('project_id')->constrained()->onDelete('cascade');
     $table->foreignId('user_id')->constrained()->onDelete('cascade');
     $table->timestamps();
 });

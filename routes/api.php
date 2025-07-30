@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,9 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // User management
     Route::apiResource('users', UserController::class);
-    
-    // Project management
-    Route::apiResource('projects', ProjectController::class);
     
     // Add more API resources here as you create them
     // Route::apiResource('tasks', TaskController::class);
