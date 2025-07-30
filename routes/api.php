@@ -21,8 +21,8 @@ use App\Http\Controllers\Api\RoleController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// Public roles endpoint for testing
-Route::get('/roles/public', [RoleController::class, 'index']);
+// Public roles endpoint
+Route::get('/roles', [RoleController::class, 'index']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -33,7 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     
     // Role management
-    Route::get('/roles', [RoleController::class, 'index']);
     Route::get('/roles/{role}', [RoleController::class, 'show']);
     
     // Add more API resources here as you create them
