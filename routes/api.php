@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SubCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +25,17 @@ Route::post('/register', [AuthController::class, 'register']);
 
 // Public roles endpoint
 Route::get('/roles', [RoleController::class, 'index']);
+
+// Public category and subcategory endpoints
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/active', [CategoryController::class, 'active']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
+
+Route::get('/subcategories', [SubCategoryController::class, 'index']);
+Route::get('/subcategories/active', [SubCategoryController::class, 'active']);
+Route::get('/subcategories/{subCategory}', [SubCategoryController::class, 'show']);
+Route::get('/categories/{category}/subcategories', [SubCategoryController::class, 'byCategory']);
+Route::get('/categories/{category}/subcategories/active', [SubCategoryController::class, 'activeByCategory']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
