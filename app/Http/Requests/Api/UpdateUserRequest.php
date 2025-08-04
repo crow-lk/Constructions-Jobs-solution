@@ -34,6 +34,13 @@ class UpdateUserRequest extends FormRequest
             ],
             'password' => ['sometimes', Password::defaults()],
             'role' => ['sometimes', 'string', 'in:admin,worker,client'],
+            'business_registration_number' => [
+                'sometimes',
+                'required_if:role,worker',
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ];
     }
 
@@ -47,6 +54,8 @@ class UpdateUserRequest extends FormRequest
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email is already registered.',
             'role.in' => 'Role must be one of: admin, worker, client.',
+            'business_registration_number.required_if' => 'Business registration number is required for workers.',
+            'business_registration_number.max' => 'Business registration number cannot exceed 255 characters.',
         ];
     }
 } 

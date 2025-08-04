@@ -25,7 +25,40 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required(fn (string $context): bool => $context === 'create')
+                    ->minLength(8)
+                    ->same('passwordConfirmation')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->label(fn (string $context): string => $context === 'edit' ? 'New Password' : 'Password'),
+                Forms\Components\TextInput::make('passwordConfirmation')
+                    ->password()
+                    ->label('Password Confirmation')
+                    ->required(fn (string $context): bool => $context === 'create')
+                    ->minLength(8)
+                    ->dehydrated(false),
+                Forms\Components\Select::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'worker' => 'Worker',
+                        'client' => 'Client',
+                    ])
+                    ->required()
+                    ->reactive(),
+                Forms\Components\TextInput::make('business_registration_number')
+                    ->label('Business Registration Number')
+                    ->visible(fn (callable $get): bool => $get('role') === 'worker')
+                    ->required(fn (callable $get): bool => $get('role') === 'worker')
+                    ->maxLength(255)
+                    ->helperText('Required for worker accounts'),
             ]);
     }
 
@@ -37,6 +70,11 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('role')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('business_registration_number')
+                    ->label('Business Registration Number')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email_verified_at')->dateTime()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable(),

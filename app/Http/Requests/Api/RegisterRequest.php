@@ -27,6 +27,12 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'role' => ['required', 'string', 'in:admin,worker,client'],
+            'business_registration_number' => [
+                'required_if:role,worker',
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ];
     }
 
@@ -45,6 +51,8 @@ class RegisterRequest extends FormRequest
             'password.confirmed' => 'Password confirmation does not match.',
             'role.required' => 'Role is required.',
             'role.in' => 'Role must be one of: admin, worker, client.',
+            'business_registration_number.required_if' => 'Business registration number is required for workers.',
+            'business_registration_number.max' => 'Business registration number cannot exceed 255 characters.',
         ];
     }
 } 
