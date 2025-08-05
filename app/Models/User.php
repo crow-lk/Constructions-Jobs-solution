@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'role_id',
         'business_registration_number',
+        'business_registration_document',
     ];
 
     /**

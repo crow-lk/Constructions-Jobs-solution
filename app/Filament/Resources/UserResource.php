@@ -11,7 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserResource extends Resource
 {
@@ -19,7 +20,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Users';
+    protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
@@ -31,34 +32,37 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
+                    ->unique(ignoreRecord: true) // Add unique validation with ignoring current record
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->required(fn (string $context): bool => $context === 'create')
-                    ->minLength(8)
-                    ->same('passwordConfirmation')
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                     ->dehydrated(fn ($state) => filled($state))
-                    ->label(fn (string $context): string => $context === 'edit' ? 'New Password' : 'Password'),
-                Forms\Components\TextInput::make('passwordConfirmation')
-                    ->password()
-                    ->label('Password Confirmation')
                     ->required(fn (string $context): bool => $context === 'create')
-                    ->minLength(8)
-                    ->dehydrated(false),
+                    ->rule(Password::default())
+                    ->confirmed(),
+                Forms\Components\TextInput::make('password_confirmation')
+                    ->password()
+                    ->dehydrated(false)
+                    ->required(fn (string $context): bool => $context === 'create'),
                 Forms\Components\Select::make('role')
                     ->options([
                         'admin' => 'Admin',
+                        'manager' => 'Manager',
                         'worker' => 'Worker',
                         'client' => 'Client',
                     ])
                     ->required()
-                    ->reactive(),
+                    ->live(),
                 Forms\Components\TextInput::make('business_registration_number')
-                    ->label('Business Registration Number')
-                    ->visible(fn (callable $get): bool => $get('role') === 'worker')
-                    ->required(fn (callable $get): bool => $get('role') === 'worker')
                     ->maxLength(255)
-                    ->helperText('Required for worker accounts'),
+                    ->visible(fn (Forms\Get $get): bool => $get('role') === 'worker'),
+                Forms\Components\FileUpload::make('business_registration_document')
+                    ->directory('business-registration-documents')
+                    ->preserveFilenames()
+                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                    ->maxSize(10240) // 10MB
+                    ->visible(fn (Forms\Get $get): bool => $get('role') === 'worker'),
             ]);
     }
 
@@ -66,24 +70,40 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('email')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('role')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('business_registration_number')
-                    ->label('Business Registration Number')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('role')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'admin' => 'danger',
+                        'manager' => 'warning',
+                        'worker' => 'success',
+                        'client' => 'info',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('email_verified_at')->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'manager' => 'Manager',
+                        'worker' => 'Worker',
+                        'client' => 'Client',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

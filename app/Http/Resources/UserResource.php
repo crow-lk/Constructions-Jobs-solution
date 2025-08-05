@@ -20,6 +20,8 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'role' => $this->role,
             'business_registration_number' => $this->business_registration_number,
+            'business_registration_document' => $this->business_registration_document,
+            'business_registration_document_url' => $this->business_registration_document ? \Illuminate\Support\Facades\Storage::url($this->business_registration_document) : null,
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

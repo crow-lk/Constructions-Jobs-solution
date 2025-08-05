@@ -1,402 +1,462 @@
-# API Documentation for Mobile App
-
-This document provides comprehensive information about the API endpoints available for your mobile app integration with Laravel Filament backend.
-
-## Base URL
-```
-http://your-domain.com/api
-```
-
-## Authentication
-
-The API uses Laravel Sanctum for token-based authentication. Include the token in the Authorization header for protected routes.
-
-### Headers
-```
-Authorization: Bearer {your-token}
-Content-Type: application/json
-Accept: application/json
-```
+# API Documentation
 
 ## Authentication Endpoints
 
-### 1. Register User
-**POST** `/api/register`
-
-**Request Body:**
-```json
-{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123",
-    "password_confirmation": "password123"
-}
-```
-
-**Response:**
-```json
-{
-    "message": "Registration successful",
-    "user": {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com",
-        "email_verified_at": null,
-        "created_at": "2024-01-01T00:00:00.000000Z",
-        "updated_at": "2024-01-01T00:00:00.000000Z"
-    },
-    "token": "1|abc123..."
-}
-```
-
-### 2. Login User
-**POST** `/api/login`
-
-**Request Body:**
-```json
-{
-    "email": "john@example.com",
-    "password": "password123"
-}
-```
-
-**Response:**
-```json
-{
+### Login
+- **POST** `/api/login`
+- **Description**: Authenticate user and get access token
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+- **Response**:
+  ```json
+  {
     "message": "Login successful",
     "user": {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com",
-        "email_verified_at": null,
-        "created_at": "2024-01-01T00:00:00.000000Z",
-        "updated_at": "2024-01-01T00:00:00.000000Z"
+      "id": 1,
+      "name": "John Doe",
+      "email": "user@example.com",
+      "role": "worker",
+      "business_registration_number": "BRN123456",
+      "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+      "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
     },
     "token": "1|abc123..."
-}
-```
+  }
+  ```
 
-### 3. Get Current User
-**GET** `/api/user`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Response:**
-```json
-{
+### Register
+- **POST** `/api/register`
+- **Description**: Register a new user
+- **Body** (multipart/form-data):
+  ```json
+  {
+    "name": "John Doe",
+    "email": "user@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "role": "worker",
+    "business_registration_number": "BRN123456",
+    "business_registration_document": "[file upload]"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Registration successful",
     "user": {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com",
-        "email_verified_at": null,
-        "created_at": "2024-01-01T00:00:00.000000Z",
-        "updated_at": "2024-01-01T00:00:00.000000Z"
-    }
-}
-```
+      "id": 1,
+      "name": "John Doe",
+      "email": "user@example.com",
+      "role": "worker",
+      "business_registration_number": "BRN123456",
+      "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+      "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
+    },
+    "token": "1|abc123..."
+  }
+  ```
 
-### 4. Logout User
-**POST** `/api/logout`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Response:**
-```json
-{
+### Logout
+- **POST** `/api/logout`
+- **Headers**: `Authorization: Bearer {token}`
+- **Description**: Logout user and invalidate token
+- **Response**:
+  ```json
+  {
     "message": "Logged out successfully"
-}
-```
+  }
+  ```
+
+### Get Current User
+- **GET** `/api/user`
+- **Headers**: `Authorization: Bearer {token}`
+- **Description**: Get current authenticated user details
+- **Response**:
+  ```json
+  {
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "user@example.com",
+      "role": "worker",
+      "business_registration_number": "BRN123456",
+      "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+      "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
+    }
+  }
+  ```
 
 ## User Management Endpoints
 
-### 1. List Users
-**GET** `/api/users`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Query Parameters:**
-- `search` (optional): Search by name or email
-- `sort_by` (optional): Field to sort by (name, email, created_at)
-- `sort_direction` (optional): asc or desc
-- `per_page` (optional): Number of items per page (default: 15)
-
-**Response:**
-```json
-{
+### List Users
+- **GET** `/api/users`
+- **Headers**: `Authorization: Bearer {token}`
+- **Query Parameters**:
+  - `search` (optional): Search by name or email
+  - `sort_by` (optional): Field to sort by
+  - `sort_direction` (optional): asc or desc
+  - `per_page` (optional): Number of items per page (default: 15)
+- **Response**:
+  ```json
+  {
     "data": [
-        {
-            "id": 1,
-            "name": "John Doe",
-            "email": "john@example.com",
-            "email_verified_at": null,
-            "created_at": "2024-01-01T00:00:00.000000Z",
-            "updated_at": "2024-01-01T00:00:00.000000Z"
-        }
-    ],
-    "links": {
-        "first": "http://your-domain.com/api/users?page=1",
-        "last": "http://your-domain.com/api/users?page=1",
-        "prev": null,
-        "next": null
-    },
-    "meta": {
-        "current_page": 1,
-        "from": 1,
-        "last_page": 1,
-        "per_page": 15,
-        "to": 1,
-        "total": 1
-    }
-}
-```
-
-### 2. Get Single User
-**GET** `/api/users/{id}`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Response:**
-```json
-{
-    "user": {
+      {
         "id": 1,
         "name": "John Doe",
-        "email": "john@example.com",
-        "email_verified_at": null,
-        "created_at": "2024-01-01T00:00:00.000000Z",
-        "updated_at": "2024-01-01T00:00:00.000000Z"
-    }
-}
-```
+        "email": "user@example.com",
+        "role": "worker",
+        "business_registration_number": "BRN123456",
+        "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+        "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
+      }
+    ],
+    "links": {...},
+    "meta": {...}
+  }
+  ```
 
-### 3. Create User
-**POST** `/api/users`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Request Body:**
-```json
-{
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "password": "password123"
-}
-```
-
-**Response:**
-```json
-{
+### Create User
+- **POST** `/api/users`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body** (multipart/form-data):
+  ```json
+  {
+    "name": "John Doe",
+    "email": "user@example.com",
+    "password": "password",
+    "role": "worker",
+    "business_registration_number": "BRN123456",
+    "business_registration_document": "[file upload]"
+  }
+  ```
+- **Response**:
+  ```json
+  {
     "message": "User created successfully",
     "user": {
-        "id": 2,
-        "name": "Jane Doe",
-        "email": "jane@example.com",
-        "email_verified_at": null,
-        "created_at": "2024-01-01T00:00:00.000000Z",
-        "updated_at": "2024-01-01T00:00:00.000000Z"
+      "id": 1,
+      "name": "John Doe",
+      "email": "user@example.com",
+      "role": "worker",
+      "business_registration_number": "BRN123456",
+      "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+      "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
     }
-}
-```
+  }
+  ```
 
-### 4. Update User
-**PUT/PATCH** `/api/users/{id}`
+### Get User
+- **GET** `/api/users/{id}`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "user@example.com",
+      "role": "worker",
+      "business_registration_number": "BRN123456",
+      "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+      "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
+    }
+  }
+  ```
 
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Request Body:**
-```json
-{
-    "name": "Jane Smith",
-    "email": "jane.smith@example.com"
-}
-```
-
-**Response:**
-```json
-{
+### Update User
+- **PUT/PATCH** `/api/users/{id}`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body** (multipart/form-data):
+  ```json
+  {
+    "name": "John Doe Updated",
+    "email": "updated@example.com",
+    "role": "worker",
+    "business_registration_number": "BRN123456",
+    "business_registration_document": "[file upload]"
+  }
+  ```
+- **Response**:
+  ```json
+  {
     "message": "User updated successfully",
     "user": {
-        "id": 2,
-        "name": "Jane Smith",
-        "email": "jane.smith@example.com",
-        "email_verified_at": null,
-        "created_at": "2024-01-01T00:00:00.000000Z",
-        "updated_at": "2024-01-01T00:00:00.000000Z"
+      "id": 1,
+      "name": "John Doe Updated",
+      "email": "updated@example.com",
+      "role": "worker",
+      "business_registration_number": "BRN123456",
+      "business_registration_document": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+      "business_registration_document_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
     }
-}
-```
+  }
+  ```
 
-### 5. Delete User
-**DELETE** `/api/users/{id}`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Response:**
-```json
-{
+### Delete User
+- **DELETE** `/api/users/{id}`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
     "message": "User deleted successfully"
-}
-```
+  }
+  ```
+
+## File Upload Endpoints
+
+### Upload Business Registration Document
+- **POST** `/api/files/business-registration-document/upload`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body** (multipart/form-data):
+  ```json
+  {
+    "document": "[file upload - PDF, JPG, JPEG, PNG, max 10MB]",
+    "user_id": 1
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Business registration document uploaded successfully",
+    "file_path": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+    "file_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf"
+  }
+  ```
+
+### Get Business Registration Document
+- **GET** `/api/files/business-registration-document/get`
+- **Headers**: `Authorization: Bearer {token}`
+- **Query Parameters**:
+  - `user_id`: User ID
+- **Response**:
+  ```json
+  {
+    "file_path": "business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+    "file_url": "http://localhost:8000/storage/business-registration-documents/business_registration_1_1234567890_abc123.pdf",
+    "file_name": "business_registration_1_1234567890_abc123.pdf"
+  }
+  ```
+
+### Download Business Registration Document
+- **GET** `/api/files/business-registration-document/download`
+- **Headers**: `Authorization: Bearer {token}`
+- **Query Parameters**:
+  - `user_id`: User ID
+- **Response**: File download
+
+### Delete Business Registration Document
+- **DELETE** `/api/files/business-registration-document/delete`
+- **Headers**: `Authorization: Bearer {token}`
+- **Body**:
+  ```json
+  {
+    "user_id": 1
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Business registration document deleted successfully"
+  }
+  ```
+
+## Role Endpoints
+
+### List Roles
+- **GET** `/api/roles`
+- **Description**: Get all available roles
+- **Response**:
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "name": "admin",
+        "description": "Administrator",
+        "permissions": ["all"]
+      },
+      {
+        "id": 2,
+        "name": "worker",
+        "description": "Worker",
+        "permissions": ["create", "read", "update"]
+      },
+      {
+        "id": 3,
+        "name": "client",
+        "description": "Client",
+        "permissions": ["read"]
+      }
+    ]
+  }
+  ```
+
+### Get Role
+- **GET** `/api/roles/{id}`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+  ```json
+  {
+    "role": {
+      "id": 1,
+      "name": "admin",
+      "description": "Administrator",
+      "permissions": ["all"]
+    }
+  }
+  ```
+
+## Category Endpoints
+
+### List Categories
+- **GET** `/api/categories`
+- **Description**: Get all categories
+- **Response**:
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "name": "Construction",
+        "description": "Construction services",
+        "is_active": true
+      }
+    ]
+  }
+  ```
+
+### Get Active Categories
+- **GET** `/api/categories/active`
+- **Description**: Get only active categories
+- **Response**: Same as above but only active categories
+
+### Get Category
+- **GET** `/api/categories/{id}`
+- **Description**: Get specific category
+- **Response**:
+  ```json
+  {
+    "category": {
+      "id": 1,
+      "name": "Construction",
+      "description": "Construction services",
+      "is_active": true,
+      "sub_categories": [...]
+    }
+  }
+  ```
+
+## SubCategory Endpoints
+
+### List SubCategories
+- **GET** `/api/subcategories`
+- **Description**: Get all subcategories
+- **Response**:
+  ```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "name": "Plumbing",
+        "description": "Plumbing services",
+        "category_id": 1,
+        "is_active": true
+      }
+    ]
+  }
+  ```
+
+### Get Active SubCategories
+- **GET** `/api/subcategories/active`
+- **Description**: Get only active subcategories
+- **Response**: Same as above but only active subcategories
+
+### Get SubCategory
+- **GET** `/api/subcategories/{id}`
+- **Description**: Get specific subcategory
+- **Response**:
+  ```json
+  {
+    "sub_category": {
+      "id": 1,
+      "name": "Plumbing",
+      "description": "Plumbing services",
+      "category_id": 1,
+      "is_active": true,
+      "category": {...}
+    }
+  }
+  ```
+
+### Get SubCategories by Category
+- **GET** `/api/categories/{category_id}/subcategories`
+- **Description**: Get subcategories for a specific category
+- **Response**: Same as subcategories list but filtered by category
+
+### Get Active SubCategories by Category
+- **GET** `/api/categories/{category_id}/subcategories/active`
+- **Description**: Get active subcategories for a specific category
+- **Response**: Same as above but only active subcategories
 
 ## Error Responses
 
-All endpoints return consistent error responses:
+All endpoints may return the following error responses:
 
-### Validation Errors (422)
+### Validation Error (422)
 ```json
 {
-    "message": "The given data was invalid.",
-    "errors": {
-        "email": [
-            "The email field is required."
-        ],
-        "password": [
-            "The password field is required."
-        ]
-    }
+  "message": "The given data was invalid.",
+  "errors": {
+    "email": ["The email field is required."],
+    "password": ["The password field is required."]
+  }
 }
 ```
 
-### Authentication Errors (401)
+### Unauthorized (401)
 ```json
 {
-    "message": "Unauthenticated."
+  "message": "Unauthenticated."
 }
 ```
 
-### Not Found Errors (404)
+### Not Found (404)
 ```json
 {
-    "message": "Resource not found."
+  "message": "User not found."
 }
 ```
 
-### Server Errors (500)
+### Server Error (500)
 ```json
 {
-    "message": "Internal server error."
+  "message": "Internal server error."
 }
 ```
 
-## Mobile App Integration Tips
+## File Upload Requirements
 
-### 1. Token Storage
-Store the authentication token securely in your mobile app:
-- iOS: Keychain
-- Android: Encrypted SharedPreferences
-- React Native: SecureStore or AsyncStorage with encryption
+### Business Registration Document
+- **Accepted Formats**: PDF, JPG, JPEG, PNG
+- **Maximum Size**: 10MB
+- **Storage Location**: `storage/app/public/business-registration-documents/`
+- **Access URL**: `http://your-domain.com/storage/business-registration-documents/filename`
 
-### 2. Token Refresh
-Implement automatic token refresh when the token expires:
-```javascript
-// Example for React Native
-const refreshToken = async () => {
-    try {
-        const response = await fetch('/api/refresh', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${currentToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-        const data = await response.json();
-        // Store new token
-        await SecureStore.setItemAsync('auth_token', data.token);
-    } catch (error) {
-        // Redirect to login
-    }
-};
-```
+### File Naming Convention
+Files are automatically named using the pattern:
+`business_registration_{user_id}_{timestamp}_{random_string}.{extension}`
 
-### 3. Error Handling
-Implement proper error handling for network requests:
-```javascript
-const handleApiError = (error) => {
-    if (error.status === 401) {
-        // Token expired, redirect to login
-        navigateToLogin();
-    } else if (error.status === 422) {
-        // Validation errors, show to user
-        showValidationErrors(error.errors);
-    } else {
-        // Generic error
-        showErrorMessage(error.message);
-    }
-};
-```
+Example: `business_registration_1_1234567890_abc123.pdf`
 
-### 4. Offline Support
-Consider implementing offline support for better user experience:
-- Cache frequently accessed data
-- Queue actions when offline
-- Sync when connection is restored
+## Notes
 
-## Adding New Resources
-
-To add new API resources (e.g., Tasks, Clients, etc.), follow this pattern:
-
-1. Create the model and migration
-2. Create the API controller extending BaseController
-3. Create request validation classes
-4. Create API resources
-5. Add routes to `routes/api.php`
-
-Example for a Task resource:
-```php
-// routes/api.php
-Route::apiResource('tasks', TaskController::class);
-
-// app/Http/Controllers/Api/TaskController.php
-class TaskController extends BaseController
-{
-    public function index(Request $request)
-    {
-        $tasks = Task::paginate($request->per_page ?? 15);
-        return TaskResource::collection($tasks);
-    }
-    
-    public function store(StoreTaskRequest $request)
-    {
-        $task = Task::create($request->validated());
-        return $this->createdResponse(new TaskResource($task));
-    }
-    
-    // ... other methods
-}
-```
-
-## Testing the API
-
-You can test the API endpoints using tools like:
-- Postman
-- Insomnia
-- curl commands
-- Laravel's built-in testing
-
-Example curl command:
-```bash
-curl -X POST http://your-domain.com/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"john@example.com","password":"password123"}'
-``` 
+1. **Authentication**: Most endpoints require Bearer token authentication
+2. **File Uploads**: Use `multipart/form-data` for endpoints that accept file uploads
+3. **Worker Role Requirements**: Users with "worker" role must provide both `business_registration_number` and `business_registration_document`
+4. **File Storage**: Files are stored in the public disk and accessible via the storage link
+5. **File Cleanup**: Files are automatically deleted when users are deleted or documents are replaced 

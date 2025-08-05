@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SubCategoryController;
+use App\Http\Controllers\Api\FileUploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,14 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Role management
     Route::get('/roles/{role}', [RoleController::class, 'show']);
+    
+    // File upload management
+    Route::prefix('files')->group(function () {
+        Route::post('/business-registration-document/upload', [FileUploadController::class, 'uploadBusinessRegistrationDocument']);
+        Route::delete('/business-registration-document/delete', [FileUploadController::class, 'deleteBusinessRegistrationDocument']);
+        Route::get('/business-registration-document/get', [FileUploadController::class, 'getBusinessRegistrationDocument']);
+        Route::get('/business-registration-document/download', [FileUploadController::class, 'downloadBusinessRegistrationDocument']);
+    });
     
     // Add more API resources here as you create them
     // Route::apiResource('tasks', TaskController::class);

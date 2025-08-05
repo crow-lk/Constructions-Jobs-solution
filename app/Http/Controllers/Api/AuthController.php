@@ -42,12 +42,19 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::create([
+        $userData = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-        ]);
+        ];
+
+        // Add business registration number if provided
+        if ($request->has('business_registration_number')) {
+            $userData['business_registration_number'] = $request->business_registration_number;
+        }
+
+        $user = User::create($userData);
 
         $token = $user->createToken('mobile-app')->plainTextToken;
 

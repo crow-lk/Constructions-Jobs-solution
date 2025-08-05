@@ -39,7 +39,17 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $user = User::create($request->validated());
+        $data = $request->validated();
+        
+        // Handle file upload if present
+        if ($request->hasFile('business_registration_document')) {
+            $file = $request->file('business_registration_document');
+            $filename = 'business_registration_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('business-registration-documents', $filename, 'public');
+            $data['business_registration_document'] = $path;
+        }
+        
+        $user = User::create($data);
 
         return response()->json([
             'message' => 'User created successfully',
@@ -62,7 +72,22 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $user->update($request->validated());
+        $data = $request->validated();
+        
+        // Handle file upload if present
+        if ($request->hasFile('business_registration_document')) {
+            // Delete old file if exists
+            if ($user->business_registration_document && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->business_registration_document)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->business_registration_document);
+            }
+            
+            $file = $request->file('business_registration_document');
+            $filename = 'business_registration_' . $user->id . '_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('business-registration-documents', $filename, 'public');
+            $data['business_registration_document'] = $path;
+        }
+        
+        $user->update($data);
 
         return response()->json([
             'message' => 'User updated successfully',
@@ -75,6 +100,11 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
+        // Delete associated business registration document if exists
+        if ($user->business_registration_document && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->business_registration_document)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->business_registration_document);
+        }
+        
         $user->delete();
 
         return response()->json([
