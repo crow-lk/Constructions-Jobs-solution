@@ -54,6 +54,14 @@ class AuthController extends Controller
             $userData['business_registration_number'] = $request->business_registration_number;
         }
 
+        // Handle business registration document file upload
+        if ($request->hasFile('business_registration_document')) {
+            $file = $request->file('business_registration_document');
+            $filename = 'business_registration_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('business-registration-documents', $filename, 'public');
+            $userData['business_registration_document'] = $path;
+        }
+
         $user = User::create($userData);
 
         $token = $user->createToken('mobile-app')->plainTextToken;
