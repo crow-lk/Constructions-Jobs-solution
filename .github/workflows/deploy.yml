@@ -53,7 +53,7 @@ jobs:
       run: |
         sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p 65002 -o StrictHostKeyChecking=no u763117446@147.93.78.59 << EOF
         cd /home/u763117446/domains/homebuilders.lk/public_html/staging
-        /opt/alt/php83/usr/bin/php /usr/local/bin/composer2 install --no-dev --optimize-autoloader
-        php artisan migrate --force
-        php artisan optimize
+        /opt/alt/php84/usr/bin/php /usr/local/bin/composer2 install --no-dev --optimize-autoloader
+        /opt/alt/php84/usr/bin/php artisan migrate --force
+        /opt/alt/php84/usr/bin/php artisan optimize
         EOF
