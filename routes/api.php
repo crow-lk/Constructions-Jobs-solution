@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\FileUploadController;
+use App\Http\Middleware\Cors;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,9 +21,23 @@ use App\Http\Controllers\Api\FileUploadController;
 |
 */
 
+// Apply CORS middleware to all API routes
+Route::middleware([Cors::class])->group(function() {
+
+// Debug endpoint
+Route::get('/debug', function() {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'API is working correctly',
+        'server_time' => now()->toIso8601String(),
+        'environment' => app()->environment(),
+        'version' => app()->version(),
+    ]);
+});
+
 // Public routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/register', [AuthController::class, 'register'])->name('api.register');
 
 // Public roles endpoint
 Route::get('/roles', [RoleController::class, 'index']);
@@ -61,3 +76,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::apiResource('tasks', TaskController::class);
     // Route::apiResource('clients', ClientController::class);
 }); 
+
+// Close the CORS middleware group
+});
