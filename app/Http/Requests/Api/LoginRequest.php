@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class LoginRequest extends FormRequest
 {
@@ -22,8 +24,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ];
     }
 
@@ -33,9 +35,22 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email is required.',
-            'email.email' => 'Please provide a valid email address.',
-            'password.required' => 'Password is required.',
+            'email.required' => 'The email field is required.',
+            'email.email' => 'The email must be a valid email address.',
+            'password.required' => 'The password field is required.',
         ];
     }
-} 
+
+    /**
+     * Handle a failed validation attempt for API.
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors(),
+            ], 422)
+        );
+    }
+}

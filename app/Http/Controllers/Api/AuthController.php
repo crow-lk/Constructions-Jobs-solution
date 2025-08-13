@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -42,35 +43,59 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): JsonResponse
     {
-        $userData = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ];
+        try {
+            $userData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+            ];
 
-        // Add business registration number if provided
-        if ($request->has('business_registration_number')) {
-            $userData['business_registration_number'] = $request->business_registration_number;
+            // Add business registration number if provided
+            if ($request->filled('business_registration_number')) {
+                $userData['business_registration_number'] = $request->business_registration_number;
+            }
+
+            // Handle business registration document file upload
+            if ($request->hasFile('business_registration_document')) {
+                $file = $request->file('business_registration_document');
+                
+                // Validate file is valid
+                if ($file->isValid()) {
+                    $filename = 'business_registration_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
+                    
+                    // Store file in public disk
+                    $path = $file->storeAs('business-registration-documents', $filename, 'public');
+                    $userData['business_registration_document'] = $path;
+                } else {
+                    return response()->json([
+                        'message' => 'Invalid file upload',
+                        'errors' => ['business_registration_document' => ['The uploaded file is invalid.']]
+                    ], 422);
+                }
+            }
+
+            $user = User::create($userData);
+
+            $token = $user->createToken('mobile-app')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Registration successful',
+                'user' => new UserResource($user),
+                'token' => $token,
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Clean up uploaded file if user creation fails
+            if (isset($path) && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+
+            return response()->json([
+                'message' => 'Registration failed',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Handle business registration document file upload
-        if ($request->hasFile('business_registration_document')) {
-            $file = $request->file('business_registration_document');
-            $filename = 'business_registration_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('business-registration-documents', $filename, 'public');
-            $userData['business_registration_document'] = $path;
-        }
-
-        $user = User::create($userData);
-
-        $token = $user->createToken('mobile-app')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Registration successful',
-            'user' => new UserResource($user),
-            'token' => $token,
-        ], 201);
     }
 
     /**
@@ -94,4 +119,4 @@ class AuthController extends Controller
             'user' => new UserResource($request->user()),
         ]);
     }
-} 
+}

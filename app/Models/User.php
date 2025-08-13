@@ -24,7 +24,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'role_id',
         'business_registration_number',
         'business_registration_document',
     ];
@@ -60,3 +59,4 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 }
+

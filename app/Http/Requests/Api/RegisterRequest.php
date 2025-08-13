@@ -3,7 +3,9 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rules;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class RegisterRequest extends FormRequest
 {
@@ -23,23 +25,12 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => ['required', 'string', 'in:admin,worker,client'],
-            'business_registration_number' => [
-                'required_if:role,worker',
-                'nullable',
-                'string',
-                'max:255',
-            ],
-            'business_registration_document' => [
-                'required_if:role,worker',
-                'nullable',
-                'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:10240', // 10MB
-            ],
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|lowercase|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|string|in:admin,worker,client',
+            'business_registration_number' => 'nullable|string|max:255',
+            'business_registration_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB max
         ];
     }
 
@@ -62,8 +53,21 @@ class RegisterRequest extends FormRequest
             'business_registration_number.max' => 'Business registration number cannot exceed 255 characters.',
             'business_registration_document.required_if' => 'Business registration document is required for workers.',
             'business_registration_document.file' => 'Business registration document must be a file.',
-            'business_registration_document.mimes' => 'Business registration document must be a PDF, JPG, JPEG, or PNG file.',
+            'business_registration_document.mimes' => 'Business registration document must be a PDF, DOC, DOCX, JPG, JPEG, or PNG file.',
             'business_registration_document.max' => 'Business registration document size cannot exceed 10MB.',
         ];
     }
-} 
+
+    /**
+     * Handle a failed validation attempt for API.
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors(),
+            ], 422)
+        );
+    }
+}
