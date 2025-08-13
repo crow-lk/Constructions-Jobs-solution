@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\FileUploadController;
+use App\Http\Controllers\Api\DiagnosticsController;
 use App\Http\Middleware\Cors;
 
 /*
@@ -24,7 +26,7 @@ use App\Http\Middleware\Cors;
 // Apply CORS middleware to all API routes
 Route::middleware([Cors::class])->group(function() {
 
-// Debug endpoint
+// Debug endpoints
 Route::get('/debug', function() {
     return response()->json([
         'status' => 'success',
@@ -32,6 +34,32 @@ Route::get('/debug', function() {
         'server_time' => now()->toIso8601String(),
         'environment' => app()->environment(),
         'version' => app()->version(),
+    ]);
+});
+
+Route::get('/diagnostics', [DiagnosticsController::class, 'apiDiagnostics']);
+
+// Register diagnostics route - this will test the registration process without creating a user
+Route::post('/register-test', function(Request $request) {
+    Log::channel('daily')->info('Registration test endpoint hit', [
+        'ip' => $request->ip(),
+        'request_data' => $request->except(['password', 'password_confirmation']),
+    ]);
+    
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Registration test endpoint working',
+        'received_data' => [
+            'name' => $request->input('name', 'Not provided'),
+            'email' => $request->input('email', 'Not provided'),
+            'role' => $request->input('role', 'Not provided'),
+            'has_password' => $request->has('password') ? 'Yes' : 'No',
+            'has_password_confirmation' => $request->has('password_confirmation') ? 'Yes' : 'No',
+            'has_business_registration_number' => $request->has('business_registration_number') ? 'Yes' : 'No',
+            'has_business_registration_document' => $request->hasFile('business_registration_document') ? 'Yes' : 'No',
+            'content_type' => $request->header('Content-Type'),
+            'http_method' => $request->method(),
+        ]
     ]);
 });
 

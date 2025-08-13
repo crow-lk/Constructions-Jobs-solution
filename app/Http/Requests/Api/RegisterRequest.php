@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\Log;
 
 class RegisterRequest extends FormRequest
 {
@@ -63,6 +64,13 @@ class RegisterRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
+        Log::channel('daily')->warning('Registration validation failed', [
+            'ip' => $this->ip(),
+            'user_agent' => $this->userAgent(),
+            'errors' => $validator->errors()->toArray(),
+            'input' => $this->except(['password', 'password_confirmation']),
+        ]);
+        
         throw new HttpResponseException(
             response()->json([
                 'message' => 'The given data was invalid.',
