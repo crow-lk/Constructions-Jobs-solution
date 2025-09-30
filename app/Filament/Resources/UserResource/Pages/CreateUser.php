@@ -23,4 +23,10 @@ class CreateUser extends CreateRecord
                 ->color('gray'),
         ];
     }
+
+    //after create route to index page
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

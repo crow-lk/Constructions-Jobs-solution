@@ -16,4 +16,10 @@ class EditCategory extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    //after create route to index page
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
