@@ -14,9 +14,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed roles first
+        // Seed roles, categories, and subcategories first
         $this->call([
             RoleSeeder::class,
+            CategorySeeder::class,
+            SubCategorySeeder::class,
         ]);
 
         // Create default admin user
